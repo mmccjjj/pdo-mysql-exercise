@@ -14,4 +14,13 @@ try {
 } catch (PDOException $e) {
     die("Connection Error: " . $e->getMessage()); // display error message
 }
+
+try {
+    // Create a connection to the database
+    $dbConn2 = new PDO("mysql:host=$dbHost;dbname=$dbName;charset=utf8", $dbUser, $dbPassword);
+    $dbConn2->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    
+} catch (PDOException $e) {
+    die("Connection Error: " . $e->getMessage()); // display error message
+}
 ?>

@@ -17,6 +17,7 @@
 <!-- PHP -->
 <?php
     include 'utils/queries.php';
+    include 'utils/helper.php';
 ?>
 <!-- /PHP -->
 
@@ -42,7 +43,10 @@
                     <th scope="col">Beschreibung</th>
                     <th scope="col">Autor</th>
                     <th scope="col">publiziert</th>
+                    <!-- <th scope="col">Tage seit veröffentlichung</th> -->
                     <th scope="col"><i class="bi bi-bar-chart-fill"></i></th>
+                    <!-- <th scope="col">Summe der Verkauften Einheiten</th> -->
+                    <!-- <th scope="col">Bestseller</th> -->
                     <th scope="col"><i class="bi bi-translate"></i></th>
                     <th scope="col"><i class="bi bi-star-fill"></i></th>
                 </tr>
@@ -57,13 +61,27 @@
                         <td><?= $book['author']; ?></td>
                         <td><?php
                                 if (!empty($book['published_at'])) {
-                                $date = date_format(date_create($book['published_at']),"d.m.Y");
-                                    echo $date;
+                                    echo $book['published_at'];
                                 } else {
                                 echo "Kein Datum";
                                 }
                                 ?></td>
+                        <!-- <td><?php
+                                if (!empty($book['published_days'])) {
+                                    echo $book['published_days'];
+                                } else {
+                                echo "Keine Daten";
+                                }
+                                ?></td> -->
                         <td><?= $book['sold_copies']; ?></td>
+                        <!-- <td><?= $book['sold_copies_sum']; ?></td> -->
+                        <!-- <td><?php
+                                if (($book['bestseller'])== true) {
+                                    echo "Yes";
+                                } else {
+                                echo "No";
+                                }
+                                ?></td> -->
                         <td><?= $book['language']; ?></td>
                         <td><?= $book['rating']; ?></td>
                         
@@ -71,8 +89,7 @@
                 <?php endforeach; ?>
             </tbody>
         </table>
-
-
+        <?php echo "$result[total_sold_copies]";?>
     </section>
 
 </main>

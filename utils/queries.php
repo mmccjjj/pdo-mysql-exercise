@@ -78,11 +78,83 @@ $sortieren2= "SELECT * FROM books ORDER BY sold_copies ASC";
 $sortieren3= "SELECT * FROM books ORDER BY published_at IS NULL, published_at ASC";
 
 // Zuhafällig
-$sortieren2= "SELECT * FROM books ORDER BY sold_copies ASC";
+$sortieren4= "SELECT * FROM books ORDER BY RAND()";
+
+// Alle Bücher zuerst nach Bewertung und dann nach Verkaufszahl beides absteigend
+$sortieren5= "SELECT * FROM books ORDER BY rating ASC, sold_copies ASC";
+
+// Zuerst die Englischen und dann die Deutschen Bücher
+
+$sortieren6= "SELECT * FROM books
+                        ORDER BY 
+                            CASE 
+                                WHEN language = 'english' THEN 1
+                                WHEN language = 'deutsch' THEN 2
+                                ELSE 3
+                            END,
+                            language ASC";
 
 
-$queryString = $sortieren3;
+// FUNKTIONEN   
 
+// Alle Bücher, welche die ID 2, 5, 6, 7, 8, 9, 18 und 23 haben
+$formel1= "SELECT * FROM books WHERE id IN (2, 5, 6, 7, 8, 9, 18, 23)";
+
+// Alle Bücher, welche nicht die ID 2, 5, 6, 7, 8, 9, 18 und 23 haben
+$formel2= "SELECT * FROM books WHERE id NOT IN (2, 5, 6, 7, 8, 9, 18, 23)";
+
+//Fügt vor jedem Publikationsdatum den String “publiziert am” hinzu
+$formel3= "SELECT *, CONCAT('Publiziert am ', published_at) AS published_at FROM books";
+
+// Datum von Y-m-d zu d.m.Y 
+$formel4= "SELECT *, CONCAT('Publiziert am ', DATE_FORMAT(published_at, '%d.%m.%Y')) AS published_at FROM books";
+
+// String wie folgt: “publiziert in der X. Woche des Jahres YYYY”
+$formel5= "SELECT *, CONCAT('publiziert in der ', WEEK(published_at), '. Woche des Jahres ', YEAR(published_at)) AS published_at FROM books";
+
+// String in Grossbuchstaben ”
+$formel6= "SELECT *, UPPER(CONCAT('publiziert in der ', WEEK(published_at), '. Woche des Jahres ', YEAR(published_at))) AS published_at FROM books";
+
+// Tage seit veröffentlichung in neuer Spalte 
+$formel7 = "SELECT *, 
+                UPPER(CONCAT('publiziert in der ', WEEK(published_at), '. Woche des Jahres ', YEAR(published_at))) AS published_at,
+                DATEDIFF(CURDATE(), published_at) AS published_days 
+           FROM books";
+
+// Bestseller >500 stk verkauft hinzufügen
+$formel8 = "SELECT *, 
+                UPPER(CONCAT('publiziert in der ', WEEK(published_at), '. Woche des Jahres ', YEAR(published_at))) AS published_at,
+                DATEDIFF(CURDATE(), published_at) AS published_days,
+                CASE WHEN sold_copies >=
+                 500 THEN TRUE ELSE FALSE END AS bestseller
+           FROM books";
+
+
+
+// AGGREGIEREN
+
+// Summe aller verkauften Einheiten
+
+$aggregieren1= "SELECT *, 
+                    SUM(sold_copies) OVER (ORDER BY id) AS sold_copies_sum
+                FROM books";
+
+$aggregieren11= "SELECT 
+                    SUM(sold_copies) AS total_sold_copies
+                FROM books";
+
+
+
+// Summe aller verkauften Einheiten von Stephen King
+$aggregieren2= "SELECT *, 
+                    SUM(sold_copies) OVER (ORDER BY id) AS sold_copies_sum
+                FROM books WHERE author = 'Stephen King'";
+
+
+
+$queryString = $abfrage1;
+
+$queryString2 = $aggregieren11;
 
 
 /*
@@ -120,6 +192,37 @@ try{
 
     // alle Daten werden aus der DB geholt und in einem assoziativen Array gespeichert
     $books = $query->fetchAll(PDO::FETCH_ASSOC);
+
+    
+
+} catch (PDOException $e) {
+    die("Fehler: " . $e->getMessage());
+}
+
+catch (\Exception $e) {
+    die("Fehler: " . $e->getMessage());
+}
+
+try{
+
+    // überprüfe, ob Abfrage vorhanden ist
+    if($queryString2 == ''){
+        throw new \Exception('keine Abfrage in $queryString vorhanden');
+    }
+
+    // bereite die Abfrage vor
+    $query = $dbConn2->prepare($queryString2);
+
+    // füge Daten für Platzhalter ein, falls vorhanden
+    $query->execute($data);
+
+    // überprüfe, ob Daten zurück gegeben werden
+    if($query->rowCount() == 0) {
+        throw new \Exception('Deine Abfrage gibt keine Daten zurück');
+    }
+
+    // alle Daten werden aus der DB geholt und in einem assoziativen Array gespeichert
+    $result = $query->fetch(PDO::FETCH_ASSOC);
 
     
 
